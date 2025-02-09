@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'age', 'phone_number', 'status')
         extra_kwargs = {'password': {'write_only': True}}
 
+
     def create(self, validated_data):
         user = Profile.objects.create_user(**validated_data)
         return user
