@@ -25,5 +25,8 @@ urlpatterns = [
     path('genre/', GenreListAPIView.as_view(), name='genre_list'),
     path('genre/<int:pk>/', GenreDetailAPIView.as_view(), name='genre_detail'),
     path('rating/', RatingAPIView.as_view(), name='rating_list'),
-    path('rating/<int:pk>/', RatingEditAPIView.as_view(), name='rating_detail')
+    path('rating/<int:pk>/', RatingEditAPIView.as_view(), name='rating_detail'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout')
 ]

@@ -74,6 +74,17 @@ class Movie(models.Model):
         return self.movie_name
 
 
+    def get_avg_ratings(self):
+        all_rating = self.rating.all()
+        if all_rating.exists():
+            return round(sum([i.stars for i in all_rating]) / all_rating.count(), 1)
+        return 0
+
+
+    def get_count_user(self):
+        return self.rating.count()
+
+
 class MovieLanguages(models.Model):
     language = models.CharField(max_length=16)
     video = models.FileField(upload_to='movie_languages/', null=True, blank=True)

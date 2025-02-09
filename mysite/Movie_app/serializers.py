@@ -1,6 +1,44 @@
 from django.db.models import DateField
 from rest_framework import serializers
 from .models import *
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('username', 'email', 'password', 'first_name', 'last_name',
+                  'age', 'phone_number', 'status')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = Profile.objects.create_user(**validated_data)
+        return user
+
+    def to_representation(self, instance):
+        refresh = RefreshToken.for_user(instance)
+        return {
+            'user': {
+                'username': instance.username,
+                'email': instance.email,
+            },
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Неверные учетные данные")
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -83,11 +121,21 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     movie_languages = MovieLanguagesSerializer(many=True, read_only=True)
     movie_moments = MomentsSerializer(many=True, read_only=True)
     rating = RatingSerializer(many=True, read_only=True)
+    avg_ratings = serializers.SerializerMethodField()
+    count_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
         fields = ['movie_name', 'movie_image', 'movie_trailer', 'types', 'director', 'actor', 'year', 'genre', 'country',
-                  'movie_time', 'description', 'status_movie', 'movie_languages', 'movie_moments', 'rating']
+                  'movie_time', 'description', 'status_movie', 'movie_languages', 'movie_moments',
+                  'rating', 'avg_ratings', 'count_user']
+
+
+    def get_avg_ratings(self, obj):
+        return obj.get_avg_ratings()
+
+    def get_count_user(self, obj):
+        return obj.get_count_user()
 
 
 class CountryListSerializer(serializers.ModelSerializer):
